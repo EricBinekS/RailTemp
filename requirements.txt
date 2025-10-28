@@ -1,3 +1,7 @@
 pandas
 requests
-openpyxl
+numpy
+pyarrow
+tqdm
+pytest
+pytest-cov
