@@ -10,7 +10,6 @@ from .config import Config
 
 def translate_weather_code(code: int) -> str:
     """Decodifica o WMO weather code (código de tempo) em uma string legível."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     code_map = {
         0: 'Céu limpo', 1: 'Principalmente limpo', 2: 'Parcialmente nublado', 3: 'Nublado',
         45: 'Nevoeiro',
@@ -21,7 +20,6 @@ def translate_weather_code(code: int) -> str:
 
 def calculate_equilibrium_temperature_vectorized(df: pd.DataFrame) -> pd.Series:
     """Calcula a temperatura de equilíbrio (sem inércia) de forma vetorizada."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     air_temp = df['temperature_celsius']
     wind_kmh = df['wind_speed_kmh']
     precipitation_mm = df['precipitation_mm']
@@ -43,7 +41,6 @@ def calculate_equilibrium_temperature_vectorized(df: pd.DataFrame) -> pd.Series:
 
 def apply_thermal_inertia_fast(sb_dataframe: pd.DataFrame) -> pd.Series:
     """Aplica o modelo de inércia térmica iterativamente sobre um grupo (SB)."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     new_effects_factor = 1 - Config.THERMAL_RETENTION_FACTOR
     
     equilibrium_temps = sb_dataframe['equilibrium_temp'].to_numpy()
@@ -65,7 +62,6 @@ def apply_thermal_inertia_fast(sb_dataframe: pd.DataFrame) -> pd.Series:
 
 def run_processing_pipeline(df: pd.DataFrame) -> pd.DataFrame:
     """Executa o pipeline de transformação completo nos dados meteorológicos brutos."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     df.rename(columns={
         'time': 'datetime', 
         'temperature_2m': 'temperature_celsius', 

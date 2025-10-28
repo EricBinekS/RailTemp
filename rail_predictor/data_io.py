@@ -9,7 +9,6 @@ from .config import Config
 
 def load_locations(filepath: str = Config.INPUT_JSON_FILE) -> pd.DataFrame:
     """Carrega e valida o arquivo JSON de locais de entrada."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     try:
         df = pd.read_json(filepath, encoding='utf-8')
         df.rename(columns={
@@ -37,7 +36,6 @@ def load_locations(filepath: str = Config.INPUT_JSON_FILE) -> pd.DataFrame:
 
 def load_history(filepath: str = Config.OUTPUT_FILE, new_data_dates: pd.Series = None) -> pd.DataFrame:
     """Carrega o histórico de previsões (Parquet) e remove dados sobrepostos."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     try:
         history_df = pd.read_parquet(filepath)
         history_df['datetime'] = pd.to_datetime(history_df['datetime'])
@@ -57,7 +55,6 @@ def load_history(filepath: str = Config.OUTPUT_FILE, new_data_dates: pd.Series =
 
 def save_output(df: pd.DataFrame, filepath: str = Config.OUTPUT_FILE):
     """Salva o DataFrame final no arquivo de saída Parquet."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     try:
         df.to_parquet(filepath, index=False, engine='pyarrow')
         print(f"\n✅ Sucesso! Histórico salvo em '{filepath}'.")

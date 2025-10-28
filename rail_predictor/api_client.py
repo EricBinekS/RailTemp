@@ -13,7 +13,6 @@ from .config import Config
 
 def fetch_single_location(location_data: Dict[str, Any], base_params: Dict[str, Any]) -> Optional[pd.DataFrame]:
     """Busca dados meteorológicos para uma única localização geográfica."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     location_id = str(location_data[Config.ID_COLUMN])
     params = base_params.copy()
     params.update({
@@ -41,7 +40,6 @@ def fetch_single_location(location_data: Dict[str, Any], base_params: Dict[str, 
 
 def fetch_weather_data_parallel(locations_df: pd.DataFrame, api_params: Dict[str, Any]) -> pd.DataFrame:
     """Orquestra a coleta de dados da API em paralelo para múltiplas localizações."""
-    # ... (Nenhuma outra mudança neste arquivo) ...
     all_weather_data = []
     locations_list = locations_df.to_dict('records')
     

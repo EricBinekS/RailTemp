@@ -18,7 +18,7 @@ class Config:
     API_BASE_URL = "https://api.open-meteo.com/v1/forecast"
     API_HOURLY_VARS = "temperature_2m,precipitation,weather_code,wind_speed_10m,direct_normal_irradiance"
     API_TIMEZONE = "America/Sao_Paulo"
-    MAX_API_WORKERS = 20 
+    MAX_API_WORKERS = 10 
     
     # --- Parâmetros do Modelo Físico ---
     RADIATION_TO_CELSIUS_FACTOR = 0.056
