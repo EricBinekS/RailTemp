@@ -9,9 +9,17 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write 
+
     steps:
       - name: Checkout do Repositório
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Sincronizar com o remoto antes de rodar
+        run: git pull origin main
 
       - name: Configurar Python 3.10
         uses: actions/setup-python@v5
