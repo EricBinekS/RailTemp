@@ -4,6 +4,7 @@ import requests
 import os
 import json
 from typing import List
+import time
 
 INPUT_JSON_FILE = "coordenadas.json" 
 OUTPUT_FILE = "rail_prediction_history.xlsx"
@@ -91,7 +92,6 @@ def main():
     try:
         locations_df = read_and_process_json_locations(INPUT_JSON_FILE)
         
-        # Adicionado um verificador para sair caso o arquivo de locais não seja carregado
         if locations_df.empty:
             print("Não foi possível carregar os dados de localização. Encerrando o programa.")
             return
@@ -107,9 +107,18 @@ def main():
             history_df = pd.read_excel(OUTPUT_FILE)
 
         all_weather_data = []
-        for _, location in locations_df.iterrows():
+        
+        total_locations = len(locations_df) 
+        print(f"\nIniciando busca de dados da API para {total_locations} locais...")
+
+        for i, (_, location) in enumerate(locations_df.iterrows()):
             location_id = str(location[ID_COLUMN])
-            print(f"Fetching data for location: {location_id}...")
+            
+            current_num = i + 1
+            percentage = (current_num / total_locations) * 100
+            
+            print(f"[{current_num}/{total_locations} ({percentage:.2f}%)] Fetching data for location: {location_id}...")
+            
             params.update({'latitude': location[LAT_COLUMN], 'longitude': location[LON_COLUMN]})
             try:
                 response = requests.get(API_BASE_URL, params=params)
@@ -120,7 +129,11 @@ def main():
                 weather_df[LON_COLUMN] = location[LON_COLUMN]
                 all_weather_data.append(weather_df)
             except requests.exceptions.RequestException as e:
-                print(f"⚠️ API call failed for {location_id}: {e}")
+                print(f"⚠️ [{current_num}/{total_locations}] API call failed for {location_id}: {e}")
+        
+            time.sleep(1)
+        
+        print("...Busca de dados da API concluída.")
 
         if not all_weather_data:
             print("No new weather data was obtained. Exiting.")
