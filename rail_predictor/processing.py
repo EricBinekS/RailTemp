@@ -76,6 +76,8 @@ def run_processing_pipeline(df: pd.DataFrame) -> pd.DataFrame:
 
     df.sort_values(by=[Config.ID_COLUMN, 'datetime'], inplace=True)
 
+    df.reset_index(drop=True, inplace=True)
+
     print("Calculando temperaturas de equilíbrio (vetorizado)...")
     df['equilibrium_temp'] = calculate_equilibrium_temperature_vectorized(df)
 
