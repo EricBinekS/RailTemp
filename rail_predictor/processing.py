@@ -82,8 +82,8 @@ def run_processing_pipeline(df: pd.DataFrame) -> pd.DataFrame:
     df['equilibrium_temp'] = calculate_equilibrium_temperature_vectorized(df)
 
     print("Aplicando modelo de inércia térmica (otimizado)...")
-    estimations = df.groupby(Config.ID_COLUMN).apply(apply_thermal_inertia_fast, include_groups=False)
-    df['estimated_rail_temp'] = estimations
+    estimations = df.groupby(Config.ID_COLUMN, group_keys=False).apply(apply_thermal_inertia_fast)
+    df['estimated_rail_temp'] = estimations.values
     
     df['sky_condition'] = df['weather_code'].apply(translate_weather_code)
 
