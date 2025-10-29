@@ -8,9 +8,8 @@ on:
 jobs:
   run-script:
     runs-on: ubuntu-latest
-
     permissions:
-      contents: write 
+      contents: write # Permissão essencial para commit E releases
 
     steps:
       - name: Checkout do Repositório
@@ -39,3 +38,15 @@ jobs:
         with:
           commit_message: "Auto: Atualiza histórico de previsão (parquet)"
           file_pattern: "data/rail_prediction_history.parquet"
+        
+      - name: Atualizar Release 'latest-data' com o novo Parquet
+        uses: softprops/action-gh-release@v2.0.8 
+        with:
+          tag_name: latest-data 
+          name: "Latest Prediction Data"
+          body: "Arquivo parquet atualizado pela Action."
+          prerelease: false 
+          draft: false
+          files: data/rail_prediction_history.parquet 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
