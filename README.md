@@ -35,3 +35,37 @@ O processo é executado diariamente via GitHub Actions, gerando um arquivo de hi
 ##  Estrutura do Projeto
 
 O projeto é estruturado como um pacote Python para aderir ao Princípio da Responsabilidade Única (SRP).
+
+##  Comandos Úteis (Ambiente Local)
+
+Guia rápido para configurar e executar o projeto manualmente em sua máquina local.
+
+### 1. Configuração do Ambiente
+
+Execute estes comandos apenas uma vez para configurar o projeto.
+
+```bash
+# 1. Crie o ambiente virtual (venv)
+python -m venv .venv
+
+# 2. Ative o ambiente (Windows - CMD/PowerShell)
+.\.venv\Scripts\activate
+# OU (macOS/Linux)
+# source .venv/bin/activate
+
+# 3. Instale todas as dependências necessárias
+pip install -r requirements.txt
+```
+
+### 2. Execução e Testes
+
+```bash
+# 1. Para rodar a pipeline principal de ETL
+python main.py
+
+# 2. Para rodar a suíte de testes unitários
+pytest
+
+# 3. Para rodar os testes em modo detalhado (verbose)
+pytest -v
+```
