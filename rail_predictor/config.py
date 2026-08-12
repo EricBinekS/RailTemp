@@ -19,6 +19,11 @@ class Config:
     API_HOURLY_VARS = "temperature_2m,precipitation,weather_code,wind_speed_10m,direct_normal_irradiance"
     API_TIMEZONE = "America/Sao_Paulo"
     MAX_API_WORKERS = 10 
+
+    # --- Configurações da Janela Móvel (Rolling Window) ---
+    # O parquet final deve conter sempre: D-3 (passado) até D+3 (futuro)
+    ROLLING_WINDOW_DAYS_PAST = 3
+    ROLLING_WINDOW_DAYS_FUTURE = 3
     
     # --- Parâmetros do Modelo Físico ---
     RADIATION_TO_CELSIUS_FACTOR = 0.056

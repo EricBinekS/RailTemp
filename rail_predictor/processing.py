@@ -4,6 +4,7 @@ Módulo de Processamento e Modelagem.
 """
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
 # Importação relativa
 from .config import Config
@@ -95,3 +96,52 @@ def run_processing_pipeline(df: pd.DataFrame) -> pd.DataFrame:
     
     final_columns = [col for col in ordered_columns if col in df.columns]
     return df[final_columns]
+
+
+def apply_rolling_window(
+    df: pd.DataFrame,
+    reference_date=None,
+    days_past: int = Config.ROLLING_WINDOW_DAYS_PAST,
+    days_future: int = Config.ROLLING_WINDOW_DAYS_FUTURE
+) -> pd.DataFrame:
+    """
+    Filtra o DataFrame para manter apenas a janela móvel de datas
+    [D-days_past, D+days_future], onde D é a data de referência (hoje, por padrão).
+
+    Isso garante que o arquivo final nunca cresça indefinidamente, contendo
+    sempre e apenas os dados relevantes para a análise (passado recente,
+    dia atual e previsão futura).
+
+    Args:
+        df: DataFrame contendo uma coluna 'datetime'.
+        reference_date: Data de referência (D0). Se None, usa a data atual.
+        days_past: Quantos dias no passado manter (D-N).
+        days_future: Quantos dias no futuro manter (D+N).
+
+    Returns:
+        DataFrame filtrado, contendo apenas as linhas dentro da janela.
+    """
+    if df.empty:
+        return df
+
+    if reference_date is None:
+        reference_date = datetime.now()
+
+    reference_date = pd.Timestamp(reference_date).normalize()
+
+    start_date = (reference_date - pd.Timedelta(days=days_past)).date()
+    end_date = (reference_date + pd.Timedelta(days=days_future)).date()
+
+    row_dates = pd.to_datetime(df['datetime']).dt.date
+    mask = (row_dates >= start_date) & (row_dates <= end_date)
+
+    filtered_df = df.loc[mask].copy()
+
+    removed = len(df) - len(filtered_df)
+    if removed > 0:
+        print(
+            f"🧹 Janela móvel aplicada [{start_date} a {end_date}]: "
+            f"{removed} linhas fora da janela foram descartadas."
+        )
+
+    return filtered_df

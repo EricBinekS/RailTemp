@@ -4,6 +4,7 @@ Testes unitários para o módulo processing.py
 """
 import pandas as pd
 import numpy as np
+from datetime import datetime, timedelta
 from pandas.testing import assert_series_equal, assert_frame_equal
 import pytest # Importa o pytest
 
@@ -11,7 +12,8 @@ import pytest # Importa o pytest
 from rail_predictor.processing import (
     translate_weather_code,
     calculate_equilibrium_temperature_vectorized,
-    apply_thermal_inertia_fast
+    apply_thermal_inertia_fast,
+    apply_rolling_window
 )
 # Precisamos da classe Config para testar com as constantes corretas
 from rail_predictor.config import Config
@@ -124,3 +126,73 @@ def test_apply_thermal_inertia_fast():
     ])
     
     assert_series_equal(result_series, expected_series, check_names=False)
+
+
+def test_apply_rolling_window_filters_correctly():
+    """
+    Testa se a janela móvel mantém apenas D-3 a D+3 e descarta o resto,
+    usando uma data de referência fixa para o teste ser determinístico.
+    """
+    # 1. ARRANGE: D0 fixo para o teste
+    reference_date = datetime(2026, 8, 12)
+
+    dates = [
+        reference_date - timedelta(days=10),  # fora (muito antigo)
+        reference_date - timedelta(days=4),   # fora (D-4)
+        reference_date - timedelta(days=3),   # dentro (D-3, borda)
+        reference_date - timedelta(days=1),   # dentro
+        reference_date,                       # dentro (D0)
+        reference_date + timedelta(days=3),   # dentro (D+3, borda)
+        reference_date + timedelta(days=4),   # fora (D+4)
+        reference_date + timedelta(days=15),  # fora (muito no futuro)
+    ]
+
+    test_data = pd.DataFrame({
+        'SB': ['A'] * len(dates),
+        'datetime': dates,
+        'estimated_rail_temp': range(len(dates))
+    })
+
+    # 2. ACT
+    result_df = apply_rolling_window(
+        test_data,
+        reference_date=reference_date,
+        days_past=3,
+        days_future=3
+    )
+
+    # 3. ASSERT: apenas as 4 linhas dentro de [D-3, D+3] devem sobrar
+    assert len(result_df) == 4
+    expected_dates = {
+        (reference_date - timedelta(days=3)).date(),
+        (reference_date - timedelta(days=1)).date(),
+        reference_date.date(),
+        (reference_date + timedelta(days=3)).date(),
+    }
+    result_dates = set(pd.to_datetime(result_df['datetime']).dt.date)
+    assert result_dates == expected_dates
+
+
+def test_apply_rolling_window_empty_dataframe():
+    """Testa se um DataFrame vazio é tratado sem erros."""
+    empty_df = pd.DataFrame(columns=['SB', 'datetime'])
+    result_df = apply_rolling_window(empty_df)
+    assert result_df.empty
+
+
+def test_apply_rolling_window_default_reference_is_today():
+    """Testa se, sem data de referência explícita, a função usa 'hoje'."""
+    today = datetime.now()
+
+    test_data = pd.DataFrame({
+        'SB': ['A', 'A', 'A'],
+        'datetime': [
+            today - timedelta(days=100),  # fora
+            today,                        # dentro
+            today + timedelta(days=100),  # fora
+        ]
+    })
+
+    result_df = apply_rolling_window(test_data)
+
+    assert len(result_df) == 1
