@@ -42,22 +42,26 @@ def test_calculate_equilibrium_temperature_vectorized():
         'temperature_celsius': [
             10.0,  # Caso 1
             10.0,  # Caso 2
-            10.0   # Caso 3
+            10.0,  # Caso 3
+            10.0   # Caso 4
         ],
         'wind_speed_kmh': [
             Config.WIND_ADJUSTMENT_FACTOR,  # Caso 1 (Vento = 8.5)
-            8.5,                            # Caso 2
-            0.0                             # Caso 3
+            8.5,                            # Caso 2 (Chuva com vento)
+            0.0,                            # Caso 3
+            0.0                             # Caso 4 (Chuva sem vento)
         ],
         'precipitation_mm': [
             0.0,  # Caso 1
             1.0,  # Caso 2 (Chovendo)
-            0.0   # Caso 3
+            0.0,  # Caso 3
+            1.0   # Caso 4 (Chovendo)
         ],
         'solar_radiation_wm2': [
             100.0,    # Caso 1
-            1000.0,   # Caso 2
-            10000.0   # Caso 3 (Valor extremo)
+            1000.0,   # Caso 2 (deve ser ignorada - céu encoberto na chuva)
+            10000.0,  # Caso 3 (Valor extremo)
+            500.0     # Caso 4 (deve ser ignorada - céu encoberto na chuva)
         ],
     })
 
@@ -69,14 +73,21 @@ def test_calculate_equilibrium_temperature_vectorized():
     # Caso 1: (10.0 + (100.0 * 0.056)) - (8.5 / 8.5) = (10.0 + 5.6) - 1.0 = 14.6
     expected_case_1 = 14.6
 
-    # Caso 2: 10.0 + RAIN_ADDITION_CELSIUS = 10.0 + 1.5 = 11.5
-    expected_case_2 = 11.5
+    # Caso 2 (chuva + vento): (10.0 + RAIN_ADDITION_CELSIUS) - (8.5 / 8.5)
+    # = (10.0 + 1.5) - 1.0 = 10.5
+    # A radiação solar (1000.0) é ignorada, mas o vento continua resfriando.
+    expected_case_2 = 10.5
 
     # Caso 3: solar_adj = 10000.0 * 0.056 = 560. Teto é 20.0.
     # (10.0 + 20.0) - (0.0 / 8.5) = 30.0
     expected_case_3 = 30.0
 
-    expected_series = pd.Series([expected_case_1, expected_case_2, expected_case_3])
+    # Caso 4 (chuva sem vento): (10.0 + 1.5) - (0.0 / 8.5) = 11.5
+    expected_case_4 = 11.5
+
+    expected_series = pd.Series([
+        expected_case_1, expected_case_2, expected_case_3, expected_case_4
+    ])
 
     assert_series_equal(
         result_series.astype(float), 

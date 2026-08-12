@@ -16,7 +16,12 @@ class Config:
 
     # --- Configurações da API Open-Meteo ---
     API_BASE_URL = "https://api.open-meteo.com/v1/forecast"
-    API_HOURLY_VARS = "temperature_2m,precipitation,weather_code,wind_speed_10m,direct_normal_irradiance"
+    # NOTA: usamos 'shortwave_radiation' (GHI - irradiância global horizontal),
+    # que é a radiação que de fato incide sobre uma superfície plana (o trilho).
+    # Antes usávamos 'direct_normal_irradiance' (DNI - irradiância normal direta,
+    # medida perpendicular ao sol), que superestima o ganho solar com o sol baixo
+    # no horizonte (início da manhã / fim da tarde).
+    API_HOURLY_VARS = "temperature_2m,precipitation,weather_code,wind_speed_10m,shortwave_radiation"
     API_TIMEZONE = "America/Sao_Paulo"
     MAX_API_WORKERS = 10 
 
@@ -26,6 +31,11 @@ class Config:
     ROLLING_WINDOW_DAYS_FUTURE = 3
     
     # --- Parâmetros do Modelo Físico ---
+    # ATENÇÃO: RADIATION_TO_CELSIUS_FACTOR foi calibrado originalmente para
+    # 'direct_normal_irradiance' (DNI). Como agora usamos 'shortwave_radiation'
+    # (GHI, tipicamente com valores mais baixos que DNI), este fator provavelmente
+    # precisa ser recalibrado contra medições reais de temperatura de trilho.
+    # Mantido em 0.056 por ora - revisar com dados de campo.
     RADIATION_TO_CELSIUS_FACTOR = 0.056
     SOLAR_ADJUSTMENT_CEILING = 20.0
     WIND_ADJUSTMENT_FACTOR = 8.5

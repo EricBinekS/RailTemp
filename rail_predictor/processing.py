@@ -33,9 +33,14 @@ def calculate_equilibrium_temperature_vectorized(df: pd.DataFrame) -> pd.Series:
     
     equilibrium_temp = (air_temp + solar_adjustment) - wind_adjustment
     
+    # Durante chuva, assumimos céu encoberto (sem ganho solar), mas o vento
+    # continua resfriando o trilho por convecção - por isso o ajuste de vento
+    # é preservado mesmo no cenário de chuva.
+    rain_equilibrium_temp = (air_temp + Config.RAIN_ADDITION_CELSIUS) - wind_adjustment
+
     final_equilibrium_temp = np.where(
         precipitation_mm > 0, 
-        air_temp + Config.RAIN_ADDITION_CELSIUS, 
+        rain_equilibrium_temp, 
         equilibrium_temp
     )
     return pd.Series(final_equilibrium_temp, index=df.index)
@@ -69,7 +74,7 @@ def run_processing_pipeline(df: pd.DataFrame) -> pd.DataFrame:
         'precipitation': 'precipitation_mm', 
         'weather_code': 'weather_code', 
         'wind_speed_10m': 'wind_speed_kmh', 
-        'direct_normal_irradiance': 'solar_radiation_wm2'
+        'shortwave_radiation': 'solar_radiation_wm2'
     }, inplace=True)
     
     df['datetime'] = pd.to_datetime(df['datetime'])
